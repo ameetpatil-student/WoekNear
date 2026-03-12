@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board | Browse Ads</title>
+    <style>
+        :root {
+            --primary: #4f46e5; /* Modern Indigo */
+            --sidebar-bg: #111827;
+            --card-bg: #ffffff;
+            --text-main: #374151;
+            --text-muted: #6b7280;
+            --bg-body: #f9fafb;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar-marquee {
+            width: 22%;
+            background-color: var(--sidebar-bg);
+            color: white;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-marquee h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .marquee-inner-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s;
+        }
+
+        /* MAIN FEED */
+        .main-feed {
+            width: 78%;
+            padding: 50px 8%;
+            box-sizing: border-box;
+        }
+
+        .main-feed h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #111827;
+        }
+
+        /* SEARCH & FILTER BAR */
+        .filter-container {
+            background: white;
+            padding: 10px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #f3f4f6;
+        }
+
+        .search-box {
+            flex: 1;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 48px;
+            padding: 0 20px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 5px;
+            padding-right: 5px;
+        }
+
+        .filter-btn {
+            height: 40px;
+            padding: 0 16px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .filter-btn:hover {
+            background: #f3f4f6;
+            color: var(--text-main);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* JOB CARDS */
+        .job-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid #f3f4f6;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
+            border-color: #e5e7eb;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .job-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+            text-decoration: none;
+        }
+
+        .badge {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .location-text {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .description-text {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 20px;
+        }
+
+        .salary-tag {
+            font-weight: 700;
+            color: #059669; /* Emerald Green */
+            font-size: 1rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .sidebar-marquee { width: 30%; }
+            .main-feed { width: 70%; }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar-marquee { width: 100%; height: 250px; position: relative; }
+            .main-feed { width: 100%; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar-marquee">
+        <h2>Trending Opportunities</h2>
+        <marquee direction="up" scrollamount="2" height="100%" onmouseover="this.stop();" onmouseout="this.start();">
+            {% for job in jobs %}
+            <div class="marquee-inner-card">
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 4px;">{{ job.job_title }}</div>
+                <div style="font-size: 0.75rem; color: #9ca3af;">{{ job.location }}</div>
+            </div>
+            {% endfor %}
+        </marquee>
+    </aside>
+
+    <main class="main-feed">
+        <div class="filter-container">
+            <div class="search-box">
+                <input type="text" id="jobSearch" placeholder="Search by job title or keyword..." onkeyup="filterJobs()">
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                <button class="filter-btn" onclick="setFilter('full-time', this)">Full-time</button>
+                <button class="filter-btn" onclick="setFilter('part-time', this)">Part-time</button>
+                <button class="filter-btn" onclick="setFilter('remote', this)">Remote</button>
+            </div>
+        </div>
+
+        <h1>Latest Openings</h1>
+
+        <div id="jobList">
+            {% for job in jobs %}
+            <div class="job-card" data-type="{{ job.job_type|lower }}">
+                <div class="job-header">
+                    <h3 class="job-title">{{ job.job_title }}</h3>
+                    <span class="badge">{{ job.job_type }}</span>
+                </div>
+
+                <div class="location-text">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    {{ job.location }}
+                </div>
+
+                <div class="description-text">
+                    {{ job.description|truncatewords:25 }}
+                </div>
+
+                <div class="job-footer">
+                    <span class="salary-tag">{{ job.salary }}</span>
+                    <button style="background: transparent; border: 1px solid #e5e7eb; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 0.85rem; transition: 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='inherit'">View Details</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        let currentType = 'all';
+
+        function setFilter(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentType = type;
+            filterJobs();
+        }
+
+        function filterJobs() {
+            const query = document.getElementById('jobSearch').value.toLowerCase();
+            document.querySelectorAll('.job-card').forEach(card => {
+                const title = card.querySelector('.job-title').innerText.toLowerCase();
+                const type = card.getAttribute('data-type');
+
+                const matchesSearch = title.includes(query);
+                const matchesType = (currentType === 'all' || type === currentType);
+
+                if (matchesSearch && matchesType) {
+                    card.style.display = "block";
+                    card.style.opacity = "0";
+                    setTimeout(() => { card.style.opacity = "1"; }, 10);
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

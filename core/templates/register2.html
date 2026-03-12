@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | WorkNear</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #000; --text-muted: #64748b; }
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; background: #fff; }
+        
+        .main-wrapper { display: flex; height: 100vh; width: 100vw; }
+
+        /* Left Side */
+        .info-panel {
+            flex: 1; background: var(--primary); color: white;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 80px;
+        }
+        .info-panel h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; }
+        
+        /* Right Side */
+        .form-panel {
+            flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px;
+        }
+        .form-box { width: 100%; max-width: 400px; }
+        h2 { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+
+        .input-group { margin-bottom: 15px; }
+        label { font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 5px; }
+        input { 
+            width: 100%; padding: 12px; border: 1.5px solid #eef2f6; 
+            border-radius: 10px; outline: none; font-family: inherit;
+        }
+        input:focus { border-color: #000; }
+
+        .btn-reg {
+            width: 100%; padding: 15px; background: #000; color: #fff;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+            margin-top: 15px; font-size: 1rem;
+        }
+
+        @media (max-width: 900px) { .info-panel { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="info-panel">
+            <h1>Start your<br>journey.</h1>
+            <p style="opacity: 0.7; line-height: 1.6; max-width: 350px;">
+                Create an account and join the WorkNear community to discover opportunities right in your neighborhood.
+            </p>
+        </div>
+        <div class="form-panel">
+            <div class="form-box">
+                <h2>Create Account</h2>
+                <p style="color: var(--text-muted); margin-bottom: 25px;">Join us today!</p>
+
+                <form method="POST" action="{% url 'register' %}">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" placeholder="name@email.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Min. 8 characters" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-reg">Create Account</button>
+                </form>
+
+                <p style="text-align: center; font-size: 0.9rem; margin-top: 25px;">
+                    Already have an account? <a href="{% url 'employer_login' %}" style="color: #000; font-weight: 700; text-decoration: none;">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

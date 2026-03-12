@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job - Employer Portal</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: white;
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+        }
+
+        .header h2 {
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="header">
+        <h2>Post a New Job</h2>
+        <p style="color: #64748b;">Fill in the details below to find your next great hire.</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <span class="section-title">Core Information</span>
+            <div class="form-group">
+                <label for="id_job_title">Job Title</label>
+                <input type="text" name="job_title" id="id_job_title" placeholder="e.g. Python Developer" required>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label for="id_location">Location</label>
+                    <input type="text" name="location" id="id_location" placeholder="e.g. Remote or Bangalore" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_job_type">Job Type</label>
+                    <select name="job_type" id="id_job_type">
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Job Details</span>
+            <div class="form-group">
+                <label for="id_description">Job Description</label>
+                <textarea name="description" id="id_description" placeholder="Describe the role and day-to-day tasks..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="id_requirements">Requirements</label>
+                <textarea name="requirements" id="id_requirements" placeholder="What skills should the candidate have?"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Timeline & Pay</span>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="id_salary">Salary Range</label>
+                    <input type="text" name="salary" id="id_salary" placeholder="e.g. ₹5,00,000 - ₹8,00,000">
+                </div>
+                <div class="form-group">
+                    <label for="id_deadline">Application Deadline</label>
+                    <input type="date" name="deadline" id="id_deadline" required>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Post Job Now</button>
+    </form>
+</div>
+
+</body>
+</html>
