@@ -97,6 +97,8 @@ def employer_login(request):
 
         if user is not None:
             login(request, user)
+
+            
             try:
                 profile, created = Profile.objects.get_or_create(user=user)
                 
@@ -235,4 +237,4 @@ def reset_password1(request):
         else:
             messages.error(request, "Passwords do not match. Please try again.")
 
-    return render(request, "reset_password1.html")
+    return render(request, "reset_password1.html")  
