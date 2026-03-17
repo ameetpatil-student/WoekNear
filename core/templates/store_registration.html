@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Registration | WorkNear</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 550px;
+        }
+        .form-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .form-container p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #444;
+            font-size: 14px;
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; 
+            font-size: 14px;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Partner with WorkNear</h2>
+        <p>Register your business below to start posting local jobs.</p>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="name">Your Full Name</label>
+                <input type="text" id="name" name="name" required>
+                <div class="help-text">Enter your legal first and last name as the business owner/manager.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Contact Email Address</label>
+                <input type="email" id="email" name="email" required>
+                <div class="help-text">We will use this email for account recovery and official WorkNear updates.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="store_name">Store / Company Name</label>
+                <input type="text" id="store_name" name="store_name" required>
+                <div class="help-text">The public name of your business that job seekers will see.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Business Category</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled selected>Select a category...</option>
+                    <option value="retail">Retail & Shopping</option>
+                    <option value="food">Restaurant & Food Service</option>
+                    <option value="office">Office & Corporate</option>
+                    <option value="delivery">Delivery & Logistics</option>
+                    <option value="other">Other</option>
+                </select>
+                <div class="help-text">Helps us match your job postings to the right local candidates.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="store_location">Complete Store Location</label>
+                <input type="text" id="store_location" name="store_location" required>
+                <div class="help-text">Provide the full address including street name, neighborhood, and zip code.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Brief Store Description</label>
+                <textarea id="description" name="description" rows="3" required></textarea>
+                <div class="help-text">Describe what your business does in 1-2 sentences to attract applicants.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="mobile_number">Mobile Number</label>
+                <input type="tel" id="mobile_number" name="mobile_number" required>
+                <div class="help-text">A reachable contact number. (e.g., +91 98765 43210)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="verification_document">Verification Document (Max 5MB)</label>
+                <input type="file" id="verification_document" name="verification_document" accept=".pdf,.jpg,.jpeg,.png" onchange="checkFileSize(this)" required>
+                <div class="help-text">Upload a clear photo or PDF of your GST certificate or a recent electricity bill. Maximum file size is 5MB.</div>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Profile</button>
+        </form>
+    </div>
+
+    <script>
+        function checkFileSize(input) {
+            const maxSize = 5 * 1024 * 1024; 
+            
+            if (input.files && input.files[0]) {
+                if (input.files[0].size > maxSize) {
+                    alert("This file is too large! Please select a file smaller than 5MB.");
+                    input.value = ""; 
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

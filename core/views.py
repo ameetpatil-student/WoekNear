@@ -1,13 +1,14 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
+from .models import StoreProfile
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
- # Make sure this matches your actual model name
 
+
+
+
+ # Make sure this matches your actual model name
 @login_required 
 def jobseeker_home(request):
     """View for the Job Seeker dashboard."""
@@ -230,7 +231,7 @@ def reset_password(request):
     return render(request, "reset_password.html")
 
 
-# --- EMPLOYER PASSWORD RESET ---
+#EMPLOYER PASSWORD RESET 
 def forgot_password1(request):
     if request.method == "POST":
         email_input = request.POST.get("email")
@@ -271,6 +272,73 @@ def reset_password1(request):
 
     return render(request, "reset_password1.html")
 
-# --- MISC VIEWS ---
+# MISC VIEWS 
 def add_adds(request):
     return render(request, "add_adds.html")
+
+
+
+# user profile 
+@login_required
+def register_store_profile(request):
+    if request.method == 'POST':
+        # 1. Pull all text data manually from the HTML form's "name" attributes
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        store_name = request.POST.get('store_name')
+        
+        # --- NEW FIELDS CAPTURED HERE ---
+        category = request.POST.get('category')             
+        description = request.POST.get('description')       
+        # --------------------------------
+        
+        store_location = request.POST.get('store_location')
+        mobile_number = request.POST.get('mobile_number')
+        
+        # 2. Pull the uploaded file from request.FILES
+        verification_document = request.FILES.get('verification_document')
+
+        # 3. Get the existing profile for this user, or create a blank new one
+        profile, created = StoreProfile.objects.get_or_create(user=request.user)
+        
+        # 4. Map the HTML data to the database columns
+        profile.name = name
+        profile.email = email
+        profile.store_name = store_name
+        
+        # --- NEW FIELDS SAVED HERE ---
+        profile.category = category             
+        profile.description = description       
+        # -----------------------------
+        
+        profile.store_location = store_location
+        profile.mobile_number = mobile_number
+        
+        # Only overwrite the document if they actually uploaded a new one
+        if verification_document:
+            profile.verification_document = verification_document
+            
+        # 5. Save the final profile to the database
+        profile.save()
+
+        # 6. Redirect them back to their dashboard
+        # Make sure 'employer_home' matches the name=... in your urls.py file
+        return redirect('employer_home') 
+
+    # If it's a GET request (they just clicked a link to get here), show the form
+    return render(request, 'store_registration.html')
+
+
+@login_required
+def employer_home(request):
+    # This checks the database: "Does this logged-in user have a store profile attached?"
+    # It returns True if they do, and False if they don't.
+    has_profile = hasattr(request.user, 'storeprofile')
+    
+    # We pass that True/False value into our HTML dictionary
+    context = {
+        'hasattr_storeprofile': has_profile
+    }
+    
+    # Render the dashboard with the context variable so the HTML knows whether to show the yellow warning box
+    return render(request, 'employer_home.html', context)

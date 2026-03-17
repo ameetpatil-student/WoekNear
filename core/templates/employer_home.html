@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heir Dashboard | WorkNear</title>
+    <title>Employer Dashboard | WorkNear</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,6 +13,9 @@
             --card: #ffffff;
             --text-main: #111827;
             --text-muted: #64748b;
+            --warning-bg: #fffbeb;
+            --warning-text: #b45309;
+            --warning-border: #fcd34d;
         }
 
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -39,7 +42,6 @@
 
         .logo { font-weight: 800; font-size: 1.4rem; text-decoration: none; color: var(--primary); letter-spacing: -1px; }
 
-        /* Hero / Welcome */
         .welcome-section {
             padding: 60px 5% 40px;
             max-width: 1200px;
@@ -47,14 +49,59 @@
         }
 
         h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
-        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 30px;}
+
+        /* --- NEW: Setup Card Styles --- */
+        .setup-card {
+            background: var(--warning-bg);
+            border: 2px dashed var(--warning-border);
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .setup-card h2 {
+            color: var(--warning-text);
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+
+        .setup-list {
+            text-align: left;
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .setup-list li {
+            margin-bottom: 10px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover { background: #4338ca; }
 
         /* Quick Actions Bar */
         .action-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-top: 40px;
         }
 
         .action-card {
@@ -64,16 +111,14 @@
             border-radius: 24px;
             text-align: left;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
             position: relative;
-            overflow: hidden;
-            border: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            text-decoration: none;
         }
 
-        .action-card:hover {
+        .action-card:hover:not(.locked) {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
@@ -82,6 +127,19 @@
             background: white;
             color: var(--primary);
             border: 2px solid var(--primary);
+        }
+
+        /* --- NEW: Locked State Styles --- */
+        .action-card.locked {
+            background: #e2e8f0;
+            color: #94a3b8;
+            border: none;
+            cursor: not-allowed;
+        }
+        
+        .action-card.locked .btn-circle {
+            background: #cbd5e1;
+            color: #94a3b8;
         }
 
         .action-card h3 { font-size: 1.8rem; margin: 0 0 10px; font-weight: 800; }
@@ -97,45 +155,11 @@
             justify-content: center;
             font-size: 1.5rem;
             align-self: flex-end;
+            color: inherit;
+            text-decoration: none;
         }
 
-        .secondary .btn-circle { background: #f1f5f9; }
-
-        /* Guide Section */
-        .guide-section {
-            margin-top: 80px;
-            padding-bottom: 100px;
-        }
-
-        .guide-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .guide-step {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid #eef2f6;
-        }
-
-        .step-num {
-            width: 35px;
-            height: 35px;
-            background: var(--accent);
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-
-        .guide-step h4 { margin: 0 0 10px; font-size: 1.1rem; }
-        .guide-step p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+        .secondary .btn-circle { background: #f1f5f9; color: var(--primary); }
 
         @media (max-width: 768px) {
             .action-container { grid-template-columns: 1fr; }
@@ -146,7 +170,7 @@
 <body>
 
     <nav>
-        <a href="#" class="logo">WorkNear <span style="font-weight: 400; opacity: 0.5;">| Heir</span></a>
+        <a href="#" class="logo">WorkNear <span style="font-weight: 400; opacity: 0.5;">| Partner</span></a>
         <div style="display: flex; align-items: center; gap: 20px;">
             <a href="#" style="text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem;">My Dashboard</a>
             
@@ -159,54 +183,54 @@
     <main class="welcome-section">
         <header>
             <h1>Welcome back, {{ request.user.first_name|default:request.user.username }}.</h1>
-            <p class="subtitle">Ready to expand your team or promote your brand today?</p>
+            <p class="subtitle">Manage your local hiring and business promotions.</p>
         </header>
 
+        {% if not hasattr_storeprofile %}
+        
+        <div class="setup-card">
+            <h2>⚠️ Action Required: Complete Your Profile</h2>
+            <p>To keep WorkNear safe and trustworthy for local job seekers, we need to verify your business before you can post jobs.</p>
+            
+            <div class="setup-list">
+                <strong>Please have the following ready:</strong>
+                <ul>
+                    <li>Your Store / Company Name & Location</li>
+                    <li>A valid Mobile Number</li>
+                    <li>A digital copy (PDF or Photo) of your GST Certificate OR Electricity Bill</li>
+                </ul>
+            </div>
+
+            <a href="{% url 'register_store_profile' %}" class="btn-primary">Create Profile & Verify Business</a>
+        </div>
+
+        {% endif %}
         <div class="action-container">
-            <button class="action-card" onclick="location.href='#post-job'">
+            <a href="{% if hasattr_storeprofile %}#post-job{% else %}#{% endif %}" 
+               class="action-card {% if not hasattr_storeprofile %}locked{% endif %}">
                 <div>
                     <h3>Post a Job</h3>
                     <p>Find local talent for your open roles. Start receiving applications in minutes.</p>
+                    {% if not hasattr_storeprofile %}
+                        <p style="color: #ef4444; font-weight: bold; font-size: 0.9rem;">🔒 Requires Profile Verification</p>
+                    {% endif %}
                 </div>
                 <div class="btn-circle">→</div>
-            </button>
+            </a>
 
-            <button class="action-card secondary" onclick="location.href='#'">
+            <a href="{% if hasattr_storeprofile %}#post-ad{% else %}#{% endif %}" 
+               class="action-card secondary {% if not hasattr_storeprofile %}locked{% endif %}">
                 <div>
                     <h3>Post an Ad</h3>
                     <p>Boost your visibility. Promote your business services to the local community.</p>
+                    {% if not hasattr_storeprofile %}
+                        <p style="color: #ef4444; font-weight: bold; font-size: 0.9rem;">🔒 Requires Profile Verification</p>
+                    {% endif %}
                 </div>
                 <div class="btn-circle">⚡</div>
-            </button>
+            </a>
         </div>
 
-        <section class="guide-section">
-            <h2 style="font-size: 1.8rem; font-weight: 800;">How WorkNear works for you</h2>
-            <p style="color: var(--text-muted);">A simple 4-step process to get results.</p>
-
-            <div class="guide-grid">
-                <div class="guide-step">
-                    <div class="step-num">1</div>
-                    <h4>Create your Profile</h4>
-                    <p>Set up your Heir identity so local seekers can trust your brand and mission.</p>
-                </div>
-                <div class="guide-step">
-                    <div class="step-num">2</div>
-                    <h4>List Opportunity</h4>
-                    <p>Use our minimalist editor to post a job or a promotional ad in under 60 seconds.</p>
-                </div>
-                <div class="guide-step">
-                    <div class="step-num">3</div>
-                    <h4>Review & Match</h4>
-                    <p>Our algorithm shows your post to verified users within your specific zip code.</p>
-                </div>
-                <div class="guide-step">
-                    <div class="step-num">4</div>
-                    <h4>Direct Connection</h4>
-                    <p>Chat directly with applicants via our built-in secure messaging system.</p>
-                </div>
-            </div>
-        </section>
     </main>
 
 </body>
