@@ -41,6 +41,13 @@
             margin-top: 15px; font-size: 1rem;
         }
 
+        /* Alert message styling for Django messages */
+        .alert-message {
+            background-color: #f8fafc; border-left: 4px solid #000; padding: 16px;
+            border-radius: 8px; margin-bottom: 25px; font-size: 0.9rem;
+            color: #334155; font-weight: 500;
+        }
+
         @media (max-width: 900px) { .info-panel { display: none; } }
     </style>
 </head>
@@ -57,8 +64,16 @@
                 <h2>Create Account</h2>
                 <p style="color: var(--text-muted); margin-bottom: 25px;">Join us today!</p>
 
-                <form method="POST" action="{% url 'register' %}">
-                    {% csrf_token %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert-message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'employer_register' %}">
+                {% csrf_token %}
                     <div class="input-group">
                         <label>Username</label>
                         <input type="text" name="username" placeholder="Choose a username" required>
@@ -70,6 +85,10 @@
                     <div class="input-group">
                         <label>Password</label>
                         <input type="password" name="password" placeholder="Min. 8 characters" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Confirm Password</label>
+                        <input type="password" name="confirm_password" placeholder="Re-enter password" required>
                     </div>
                     
                     <button type="submit" class="btn-reg">Create Account</button>

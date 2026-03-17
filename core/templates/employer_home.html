@@ -149,13 +149,16 @@
         <a href="#" class="logo">WorkNear <span style="font-weight: 400; opacity: 0.5;">| Heir</span></a>
         <div style="display: flex; align-items: center; gap: 20px;">
             <a href="#" style="text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem;">My Dashboard</a>
-            <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%;"></div>
+            
+            <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary);">
+                {{ request.user.username|make_list|first|upper }}
+            </div>
         </div>
     </nav>
 
     <main class="welcome-section">
         <header>
-            <h1>Welcome back, Heir.</h1>
+            <h1>Welcome back, {{ request.user.first_name|default:request.user.username }}.</h1>
             <p class="subtitle">Ready to expand your team or promote your brand today?</p>
         </header>
 

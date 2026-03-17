@@ -86,22 +86,21 @@
 
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" name="username" placeholder="Enter your username" required>
+                    <input type="email" name="email" placeholder="Enter your username" required>
                 </div>
                 <div class="input-group">
                     <label>Password</label>
                     <input type="password" name="password" placeholder="****" required>
                 </div>
 
-                <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot Password?</a>
+                <a href="{% url 'forgot_password1' %}" class="forgot-link">Forgot Password?</a>
 
                 <button type="submit" class="btn-submit">Sign In as Employer</button>
             </form>
 
             <p style="text-align:center;font-size:0.9rem;color:var(--text-muted);margin-top:30px;">
-                Need to hire? <a href="{% url 'register' %}" style="color:#000;text-decoration:none;font-weight:700;">Create employer account</a>
-            </p>
-
+                Need to hire? <a href="{% url 'employer_register' %}" style="color:#000;text-decoration:none;font-weight:700;">Create employer account</a>
+</p>
             <a href="{% url 'login_view' %}" class="switch-link">Looking for a job? Login here.</a>
         </div>
     </div>

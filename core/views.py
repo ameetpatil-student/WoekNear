@@ -1,74 +1,116 @@
-from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Usertype, Profile
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+ # Make sure this matches your actual model name
 
+@login_required 
+def jobseeker_home(request):
+    """View for the Job Seeker dashboard."""
+    jobs_list = Job.objects.all() 
+    context = {
+        'jobs': jobs_list
+    }
+    return render(request, 'jobseeker_home.html', context)
+
+
+@login_required 
+def employer_dashboard(request):
+    """View for the Employer dashboard."""
+    return render(request, 'employer_dashboard.html')
+
+# The @login_required decorator forces users to log in before seeing this page.
+# If they are not logged in, Django will redirect them to your login URL.
+@login_required 
+def employer_dashboard(request):
+    # This renders the HTML page. Because 'request' is passed in, 
+    # the template automatically has access to the user's data.
+    return render(request, 'employer_dashboard.html')
+
+# Assuming these are in your models.py
+from .models import Profile, Usertype 
+
+# --- JOB SEEKER REGISTRATION ---
 def register(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
-        password = request.POST["password"]
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password") 
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists")
-            return redirect("register2")
-
-        user = User.objects.create_user(username=username, email=email, password=password)
-        
-        # Create a profile for the new user immediately
-        # We use get_or_create to prevent "IntegrityError" if a signal already created it
-        Profile.objects.get_or_create(user=user)
-
-        messages.success(request, "Account created! Please login.")
-        return redirect("employer_login")
-    return render(request, "register2.html")
-
-def register(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
-        password = request.POST["password"]
+        # Check if passwords match
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match. Please try again.")
+            return redirect("register")
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists")
             return redirect("register")
 
         user = User.objects.create_user(username=username, email=email, password=password)
-        
-        # Create a profile for the new user immediately
-        # We use get_or_create to prevent "IntegrityError" if a signal already created it
         Profile.objects.get_or_create(user=user)
 
         messages.success(request, "Account created! Please login.")
         return redirect("login_view")
+        
     return render(request, "register.html")
 
+# --- EMPLOYER REGISTRATION ---
+def employer_register(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password") 
 
-# 1. JOB SEEKER LOGIN VIEW
-# ---------------------------------------------------------
+        # Check if passwords match
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match. Please try again.")
+            return redirect("employer_register")
+            
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists")
+            return redirect("employer_register")
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        Profile.objects.get_or_create(user=user)
+
+        messages.success(request, "Employer Account created! Please login.")
+        return redirect("employer_login")
+        
+    return render(request, "register2.html")
+
+
+# --- JOB SEEKER LOGIN ---
 def login_view(request):
     if request.method == "POST":
-        username_input = request.POST.get("username")
+        email_input = request.POST.get("email") 
         password_input = request.POST.get("password")
         role_choice = request.POST.get("role_choice") 
         
-        user = authenticate(request, username=username_input, password=password_input)
+        user = None
+        
+        try:
+            user_obj = User.objects.get(email=email_input)
+            user = authenticate(request, username=user_obj.username, password=password_input)
+        except User.DoesNotExist:
+            pass
 
         if user is not None:
             login(request, user)
             try:
                 profile, created = Profile.objects.get_or_create(user=user)
                 
-                # Assign role if missing
                 if not profile.usertype and role_choice:
                     db_role = "jobseeker" if role_choice == "seeker" else "employer"
                     role_obj, _ = Usertype.objects.get_or_create(type=db_role)
                     profile.usertype = role_obj
                     profile.save()
                 
-                # Redirect based on role
                 if profile.usertype:
                     user_role = profile.usertype.type.lower()
                     if "jobseeker" in user_role:
@@ -81,35 +123,44 @@ def login_view(request):
                 print(f"Redirect error: {e}")
                 return redirect("index")
         else:
-            messages.error(request, "Invalid username or password")
+            messages.error(request, "Invalid email or password")
 
-    # If it's a GET request, show the Seeker Login Page
     return render(request, "login.html")
 
 
+# --- EMPLOYER LOGIN ---
+# --- EMPLOYER LOGIN ---
 def employer_login(request):
     if request.method == "POST":
-        username_input = request.POST.get("username")
+        # Check if the HTML form is sending an "email" OR a "username"
+        login_input = request.POST.get("email") or request.POST.get("username")
         password_input = request.POST.get("password")
         role_choice = request.POST.get("role_choice") 
         
-        user = authenticate(request, username=username_input, password=password_input)
+        user = None
+        
+        # Try to authenticate. If there's an '@', treat it as an email lookup first.
+        if login_input and '@' in login_input:
+            try:
+                user_obj = User.objects.get(email=login_input)
+                user = authenticate(request, username=user_obj.username, password=password_input)
+            except User.DoesNotExist:
+                pass
+        else:
+            # Otherwise, treat it as a standard username
+            user = authenticate(request, username=login_input, password=password_input)
 
         if user is not None:
             login(request, user)
-
-            
             try:
                 profile, created = Profile.objects.get_or_create(user=user)
                 
-                # Assign role if missing
                 if not profile.usertype and role_choice:
                     db_role = "jobseeker" if role_choice == "seeker" else "employer"
                     role_obj, _ = Usertype.objects.get_or_create(type=db_role)
                     profile.usertype = role_obj
                     profile.save()
                 
-                # Redirect based on role
                 if profile.usertype:
                     user_role = profile.usertype.type.lower()
                     if "jobseeker" in user_role:
@@ -124,50 +175,39 @@ def employer_login(request):
         else:
             messages.error(request, "Invalid username or password")
 
-    # If it's a GET request, show the Employer Login Page
     return render(request, "login1.html")
 
-# You must also define these two views so the server doesn't crash on the URLs
-@login_required
-def jobseeker_home(request):
-    return render(request, "jobseeker_home.html")
+
+# --- HOME PAGES ---
 
 @login_required
 def employer_home(request):
     return render(request, "employer_home.html")
 
-
-def logout_view(request):
-    logout(request)
-    # Changed from 'login' to 'login_view' to match your URL name
-    return redirect("login_view")
-
 def index(request):
     return render(request, "index.html")
 
-# ADD THIS FOR FORGOT PASSWORD (Simple placeholder for now)
+def logout_view(request):
+    logout(request)
+    return redirect("login_view")
+
+
+# --- JOB SEEKER PASSWORD RESET ---
 def forgot_password(request):
     if request.method == "POST":
         email_input = request.POST.get("email")
-        
-        # 1. Check if a user with this email exists in the database
         user = User.objects.filter(email=email_input).first()
         
         if user:
-            # 2. If they exist, save their email securely in the session
             request.session['reset_email'] = email_input
-            return redirect("reset_password") # Send them to the change password page
+            return redirect("reset_password") 
         else:
-            # 3. If they don't exist, show an error
             messages.error(request, "No account found with that email address.")
             return redirect("forgot_password")
             
     return render(request, "forgot-password.html")
 
-
-
 def reset_password(request):
-    # Security check: Ensure they came from the forgot password page
     email = request.session.get('reset_email')
     if not email:
         return redirect("forgot_password")
@@ -177,12 +217,9 @@ def reset_password(request):
         confirm_password = request.POST.get("confirm_password")
 
         if new_password == confirm_password:
-            # Find the user and securely set the new password
             user = User.objects.get(email=email)
-            user.set_password(new_password) # .set_password encrypts it securely!
+            user.set_password(new_password) 
             user.save()
-            
-            # Clear the session for security
             del request.session['reset_email']
             
             messages.success(request, "Password updated successfully! Please log in.")
@@ -193,28 +230,24 @@ def reset_password(request):
     return render(request, "reset_password.html")
 
 
+# --- EMPLOYER PASSWORD RESET ---
 def forgot_password1(request):
     if request.method == "POST":
         email_input = request.POST.get("email")
-        
-        # 1. Check if a user with this email exists in the database
         user = User.objects.filter(email=email_input).first()
         
         if user:
-            # 2. If they exist, save their email securely in the session
             request.session['reset_email'] = email_input
-            return redirect("reset_password") # Send them to the change password page
+            # FIX 1: Change this to reset_password1
+            return redirect("reset_password1") 
         else:
-            # 3. If they don't exist, show an error
             messages.error(request, "No account found with that email address.")
+            # FIX 2: Make sure this points to forgot_password1
             return redirect("forgot_password1")
             
     return render(request, "forgot-password1.html")
 
-
-
 def reset_password1(request):
-    # Security check: Ensure they came from the forgot password page
     email = request.session.get('reset_email')
     if not email:
         return redirect("forgot_password1")
@@ -224,17 +257,20 @@ def reset_password1(request):
         confirm_password = request.POST.get("confirm_password")
 
         if new_password == confirm_password:
-            # Find the user and securely set the new password
             user = User.objects.get(email=email)
-            user.set_password(new_password) # .set_password encrypts it securely!
+            user.set_password(new_password) 
             user.save()
             
-            # Clear the session for security
             del request.session['reset_email']
             
             messages.success(request, "Password updated successfully! Please log in.")
+            # This ensures they go to the employer login after resetting!
             return redirect("employer_login")
         else:
             messages.error(request, "Passwords do not match. Please try again.")
 
-    return render(request, "reset_password1.html")  
+    return render(request, "reset_password1.html")
+
+# --- MISC VIEWS ---
+def add_adds(request):
+    return render(request, "add_adds.html")

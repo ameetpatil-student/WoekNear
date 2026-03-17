@@ -85,14 +85,14 @@
                 {% csrf_token %}
                 <input type="hidden" name="role_choice" value="seeker">
 
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" name="username" placeholder="Enter your username" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" name="password" placeholder="****" required>
-                </div>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="****" required>
+            </div>
 
                 <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot Password?</a>
 
