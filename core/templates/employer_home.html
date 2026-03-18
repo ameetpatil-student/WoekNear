@@ -16,6 +16,9 @@
             --warning-bg: #fffbeb;
             --warning-text: #b45309;
             --warning-border: #fcd34d;
+            --info-bg: #eff6ff;
+            --info-text: #1d4ed8;
+            --info-border: #93c5fd;
         }
 
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -27,7 +30,6 @@
             color: var(--text-main);
         }
 
-        /* Sidebar / Nav */
         nav {
             display: flex;
             justify-content: space-between;
@@ -51,7 +53,6 @@
         h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
         .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 30px;}
 
-        /* --- NEW: Setup Card Styles --- */
         .setup-card {
             background: var(--warning-bg);
             border: 2px dashed var(--warning-border);
@@ -61,11 +62,18 @@
             text-align: center;
         }
 
-        .setup-card h2 {
-            color: var(--warning-text);
-            margin-top: 0;
-            font-size: 1.8rem;
+        .setup-card h2 { color: var(--warning-text); margin-top: 0; font-size: 1.8rem; }
+
+        .pending-card {
+            background: var(--info-bg);
+            border: 2px dashed var(--info-border);
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            text-align: center;
         }
+
+        .pending-card h2 { color: var(--info-text); margin-top: 0; font-size: 1.8rem; }
 
         .setup-list {
             text-align: left;
@@ -77,12 +85,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .setup-list li {
-            margin-bottom: 10px;
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
         .btn-primary {
             display: inline-block;
             background: var(--accent);
@@ -92,12 +94,9 @@
             text-decoration: none;
             font-weight: bold;
             font-size: 1.1rem;
-            transition: background 0.3s;
+            transition: 0.3s;
         }
 
-        .btn-primary:hover { background: #4338ca; }
-
-        /* Quick Actions Bar */
         .action-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -110,12 +109,12 @@
             padding: 40px;
             border-radius: 24px;
             text-align: left;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
+            transition: all 0.3s ease;
+            text-decoration: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            text-decoration: none;
+            min-height: 250px;
         }
 
         .action-card:hover:not(.locked) {
@@ -129,21 +128,12 @@
             border: 2px solid var(--primary);
         }
 
-        /* --- NEW: Locked State Styles --- */
         .action-card.locked {
             background: #e2e8f0;
             color: #94a3b8;
             border: none;
             cursor: not-allowed;
         }
-        
-        .action-card.locked .btn-circle {
-            background: #cbd5e1;
-            color: #94a3b8;
-        }
-
-        .action-card h3 { font-size: 1.8rem; margin: 0 0 10px; font-weight: 800; }
-        .action-card p { opacity: 0.8; margin-bottom: 30px; font-size: 1rem; }
 
         .btn-circle {
             width: 50px;
@@ -155,15 +145,13 @@
             justify-content: center;
             font-size: 1.5rem;
             align-self: flex-end;
-            color: inherit;
-            text-decoration: none;
         }
 
         .secondary .btn-circle { background: #f1f5f9; color: var(--primary); }
+        .locked .btn-circle { background: #cbd5e1; color: #94a3b8; }
 
         @media (max-width: 768px) {
             .action-container { grid-template-columns: 1fr; }
-            h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -172,10 +160,8 @@
     <nav>
         <a href="#" class="logo">WorkNear <span style="font-weight: 400; opacity: 0.5;">| Partner</span></a>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <a href="#" style="text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem;">My Dashboard</a>
-            
             <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary);">
-                {{ request.user.username|make_list|first|upper }}
+                {{ request.user.username|slice:":1"|upper }}
             </div>
         </div>
     </nav>
@@ -186,52 +172,56 @@
             <p class="subtitle">Manage your local hiring and business promotions.</p>
         </header>
 
-        {% if not hasattr_storeprofile %}
-        
+        {% if not has_profile %}
         <div class="setup-card">
             <h2>⚠️ Action Required: Complete Your Profile</h2>
-            <p>To keep WorkNear safe and trustworthy for local job seekers, we need to verify your business before you can post jobs.</p>
-            
+            <p>We need to verify your business before you can post jobs.</p>
             <div class="setup-list">
-                <strong>Please have the following ready:</strong>
                 <ul>
-                    <li>Your Store / Company Name & Location</li>
-                    <li>A valid Mobile Number</li>
-                    <li>A digital copy (PDF or Photo) of your GST Certificate OR Electricity Bill</li>
+                    <li>Store Name & Location</li>
+                    <li>Valid Mobile Number</li>
+                    <li>GST Certificate OR Electricity Bill</li>
                 </ul>
             </div>
-
-            <a href="{% url 'register_store_profile' %}" class="btn-primary">Create Profile & Verify Business</a>
+            <a href="{% url 'register_store_profile' %}" class="btn-primary">Create Profile</a>
         </div>
-
+        {% elif not is_approved %}
+        <div class="pending-card">
+            <h2>⏳ Verification in Progress</h2>
+            <p>Our admin team is currently reviewing your documents.</p>
+            <p style="margin-top: 15px; font-weight: 600;">Account typically approved within 24-48 hours.</p>
+        </div>
         {% endif %}
+
         <div class="action-container">
-            <a href="{% if hasattr_storeprofile %}#post-job{% else %}#{% endif %}" 
-               class="action-card {% if not hasattr_storeprofile %}locked{% endif %}">
+            <a href="{% if is_approved %}#post-job{% else %}#{% endif %}" 
+               class="action-card {% if not is_approved %}locked{% endif %}">
                 <div>
                     <h3>Post a Job</h3>
-                    <p>Find local talent for your open roles. Start receiving applications in minutes.</p>
-                    {% if not hasattr_storeprofile %}
-                        <p style="color: #ef4444; font-weight: bold; font-size: 0.9rem;">🔒 Requires Profile Verification</p>
+                    <p>Find local talent for your open roles.</p>
+                    {% if not has_profile %}
+                        <p style="color: #ef4444; font-weight: bold; font-size: 0.8rem;">🔒 Profile Required</p>
+                    {% elif not is_approved %}
+                        <p style="color: #1d4ed8; font-weight: bold; font-size: 0.8rem;">🔒 Awaiting Approval</p>
                     {% endif %}
                 </div>
                 <div class="btn-circle">→</div>
             </a>
 
-            <a href="{% if hasattr_storeprofile %}#post-ad{% else %}#{% endif %}" 
-               class="action-card secondary {% if not hasattr_storeprofile %}locked{% endif %}">
+            <a href="{% if is_approved %}#post-ad{% else %}#{% endif %}" 
+               class="action-card secondary {% if not is_approved %}locked{% endif %}">
                 <div>
                     <h3>Post an Ad</h3>
-                    <p>Boost your visibility. Promote your business services to the local community.</p>
-                    {% if not hasattr_storeprofile %}
-                        <p style="color: #ef4444; font-weight: bold; font-size: 0.9rem;">🔒 Requires Profile Verification</p>
+                    <p>Promote your services to the community.</p>
+                    {% if not has_profile %}
+                        <p style="color: #ef4444; font-weight: bold; font-size: 0.8rem;">🔒 Profile Required</p>
+                    {% elif not is_approved %}
+                        <p style="color: #1d4ed8; font-weight: bold; font-size: 0.8rem;">🔒 Awaiting Approval</p>
                     {% endif %}
                 </div>
                 <div class="btn-circle">⚡</div>
             </a>
         </div>
-
     </main>
-
 </body>
 </html>

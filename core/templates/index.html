@@ -47,6 +47,20 @@
             align-items: center;
         }
 
+        /* NEW: Admin Subtle Button */
+        .btn-nav-text {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 15px;
+            transition: color 0.3s ease;
+        }
+
+        .btn-nav-text:hover { 
+            color: var(--primary); 
+        }
+
         .btn-nav-outline {
             text-decoration: none;
             color: var(--primary);
@@ -155,6 +169,8 @@
     <nav>
         <a href="{% url 'index' %}" class="logo">WorkNear</a>
         <div class="nav-links">
+            <a href="{% url 'admin_login_view' %}" class="btn-nav-text">Admin</a>
+            
             <a href="{% url 'login_view' %}" class="btn-nav-outline">See Jobs</a>
             <a href="{% url 'employer_login' %}" class="btn-nav-solid">Add Jobs</a>
         </div>
@@ -255,7 +271,7 @@
                 <span class="footer-head">Contact Us</span>
                 <address class="contact-info">
                     Email: <b>worknear@gmail.com</b><br>
-                    Phone: <b>+91 0000000000</b><br><br>
+                    Phone: <b>+91 6366035360</b><br><br>
                     123 Neighborhood Way<br>
                     Brooklyn, NY 11201
                 </address>

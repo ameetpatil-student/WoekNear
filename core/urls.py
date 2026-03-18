@@ -18,4 +18,9 @@ urlpatterns = [
     path('jobseeker_home/', views.jobseeker_home, name='jobseeker_home'),
     path('employer_dashboard/', views.employer_dashboard, name='employer_dashboard'),
     path('employer/setup-profile/', views.register_store_profile, name='register_store_profile'),
+    path('admin_home_view', views.admin_home_view, name='admin_home_view'),
+    path('admin_login_view', views.admin_login_view, name='admin_login_view'),
+    path('register_view', views.register_view, name='register_view'),
+    path('admin_home_view', views.admin_home_view, name='admin_home_view'),
+    path('approve-store/<int:store_id>/', views.approve_store_view, name='approve_store'),
 ]

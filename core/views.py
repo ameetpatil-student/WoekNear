@@ -1,9 +1,14 @@
+from urllib import request
+
 from django.contrib.auth.models import User 
-from .models import StoreProfile
+from .models import StoreProfile , adminlogin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+import random
 
 
 
@@ -299,7 +304,8 @@ def register_store_profile(request):
         verification_document = request.FILES.get('verification_document')
 
         # 3. Get the existing profile for this user, or create a blank new one
-        profile, created = StoreProfile.objects.get_or_create(user=request.user)
+        # Change 'user' to 'employer'
+        profile, created = StoreProfile.objects.get_or_create(employer=request.user)
         
         # 4. Map the HTML data to the database columns
         profile.name = name
@@ -329,16 +335,123 @@ def register_store_profile(request):
     return render(request, 'store_registration.html')
 
 
-@login_required
+@login_required(login_url='login_view') 
 def employer_home(request):
-    # This checks the database: "Does this logged-in user have a store profile attached?"
-    # It returns True if they do, and False if they don't.
-    has_profile = hasattr(request.user, 'storeprofile')
-    
-    # We pass that True/False value into our HTML dictionary
     context = {
-        'hasattr_storeprofile': has_profile
+        'has_profile': False,
+        'is_approved': False,
     }
-    
-    # Render the dashboard with the context variable so the HTML knows whether to show the yellow warning box
+    try:
+        profile = StoreProfile.objects.get(employer=request.user)
+        context['has_profile'] = True
+        context['is_approved'] = profile.is_approved # This must be True after you click Approve
+    except StoreProfile.DoesNotExist:
+        pass
+
     return render(request, 'employer_home.html', context)
+#admin login
+def register_view(request):
+    context = {}
+    
+    if request.method == 'POST':
+        # --- PHASE 1: User clicks "Register & Send OTP" ---
+        if 'send_otp' in request.POST:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            # Check if passwords match
+            if password != confirm_password:
+                context['error'] = "Passwords do not match!"
+                return render(request, 'admin_register.html', context) # Update template name if needed
+                
+            # Check if username already exists
+            if adminlogin.objects.filter(username=username).exists():
+                context['error'] = "Username already exists!"
+                return render(request, 'admin_register.html', context)
+
+            # Generate OTP and store details in session
+            otp = str(random.randint(1000, 9999))
+            request.session['temp_username'] = username
+            request.session['temp_password'] = password
+            request.session['otp'] = otp
+            
+            # Send the email
+            subject = 'Admin Registration OTP'
+            message = f'Your Admin Registration OTP is: {otp}'
+            send_mail(subject, message, settings.EMAIL_HOST_USER, ['ameetpatil122@gmail.com'])
+            
+            # Tell HTML to show the OTP field and show a success message
+            context['otp_sent'] = True
+            context['success'] = "OTP has been sent to ameetpatil122@gmail.com."
+            return render(request, 'admin_register.html', context)
+            
+        # --- PHASE 2: User clicks "Verify & Create Account" ---
+        elif 'verify_otp' in request.POST:
+            entered_otp = request.POST.get('otp')
+            actual_otp = request.session.get('otp')
+            
+            # If OTP matches successfully
+            if entered_otp == actual_otp:
+                # Save to database
+                username = request.session.get('temp_username')
+                password = request.session.get('temp_password')
+                new_admin = adminlogin(username=username, password=password)
+                new_admin.save()
+                
+                # Clear session data
+                del request.session['temp_username']
+                del request.session['temp_password']
+                del request.session['otp']
+                
+                # REDIRECT to Admin Login Page upon success
+                return redirect('admin_login_view') 
+                
+            # If OTP is wrong
+            else:
+                context['otp_sent'] = True # Keep the OTP field visible
+                context['error'] = 'Invalid OTP. Please try again.' # Show error message
+                return render(request, 'admin_register.html', context)
+
+    return render(request, 'admin_register.html', context)
+
+def admin_login_view(request):
+    if request.method == 'POST':
+        uname = request.POST.get('username')
+        pword = request.POST.get('password')
+        
+        # Check if a record exists with this exact username and password
+        admin_exists = adminlogin.objects.filter(username=uname, password=pword).exists()
+        
+        if admin_exists:
+            request.session['admin_logged_in'] = True
+            return redirect('admin_home_view')
+        else:
+            return render(request, 'admin_login.html', {'error': 'Invalid Credentials'})
+            
+    return render(request, 'admin_login.html')
+
+def admin_home_view(request):
+    # Security check
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login_view')
+        
+    # 1. Fetch all stores where is_approved is False
+    pending_stores = StoreProfile.objects.filter(is_approved=False).order_by('-submitted_at')
+    
+    # 2. Pass them to the admin dashboard
+    return render(request, 'admin_home.html', {'pending_stores': pending_stores})
+
+# NEW: The function that approves the store
+def approve_store_view(request, store_id):
+    if not request.session.get('admin_logged_in'):
+        return redirect('admin_login_view')
+        
+    if request.method == 'POST':
+        # Find the specific store and update it
+        store = get_object_or_404(StoreProfile, id=store_id)
+        store.is_approved = True
+        store.save()
+        
+    # Send the admin back to the dashboard
+    return redirect('admin_home_view')
