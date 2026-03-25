@@ -1,5 +1,7 @@
 from django.urls import path
 from core import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('index', views.index, name='index'),
@@ -22,5 +24,9 @@ urlpatterns = [
     path('admin_login_view', views.admin_login_view, name='admin_login_view'),
     path('register_view', views.register_view, name='register_view'),
     path('admin_home_view', views.admin_home_view, name='admin_home_view'),
-    path('approve-store/<int:store_id>/', views.approve_store_view, name='approve_store'),
+    path('approve-store/<int:store_id>/', views.approve_store_view, name='approve_store_view'),
+    path('reject-store/<int:store_id>/', views.reject_store_view, name='reject_store_view'),
+    path('admin/delete-store/<int:store_id>/', views.delete_store_view, name='delete_store_view'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

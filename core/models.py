@@ -52,6 +52,7 @@ class StoreProfile(models.Model):
     
     # THE APPROVAL LOCK
     is_approved = models.BooleanField(default=False) # Defaults to False when they first submit
+    admin_remarks = models.TextField(null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

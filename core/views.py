@@ -1,5 +1,5 @@
 from urllib import request
-
+from django.db.models import Q
 from django.contrib.auth.models import User 
 from .models import StoreProfile , adminlogin
 from django.contrib.auth import authenticate, login, logout
@@ -313,8 +313,8 @@ def register_store_profile(request):
         profile.store_name = store_name
         
         # --- NEW FIELDS SAVED HERE ---
-        profile.category = category             
-        profile.description = description       
+        profile.category = category
+        profile.description = description
         # -----------------------------
         
         profile.store_location = store_location
@@ -337,18 +337,26 @@ def register_store_profile(request):
 
 @login_required(login_url='login_view') 
 def employer_home(request):
+    # 1. Try to fetch the profile for the logged-in user
+    # .filter().first() is safer than .get() because it won't crash if the profile is missing
+    profile = StoreProfile.objects.filter(employer=request.user).first()
+    
+    # 2. Build the context dictionary
     context = {
-        'has_profile': False,
-        'is_approved': False,
+        'profile': profile,
+        # This acts as your 'has_profile' flag: 
+        # In HTML, you can just do {% if profile %}
+        'has_profile': profile is not None,
+        
+        # This acts as your 'is_approved' flag:
+        # It safely checks the attribute only if the profile exists
+        'is_approved': profile.is_approved if profile else False,
     }
-    try:
-        profile = StoreProfile.objects.get(employer=request.user)
-        context['has_profile'] = True
-        context['is_approved'] = profile.is_approved # This must be True after you click Approve
-    except StoreProfile.DoesNotExist:
-        pass
 
+    # 3. Send everything to the template
     return render(request, 'employer_home.html', context)
+
+
 #admin login
 def register_view(request):
     context = {}
@@ -431,27 +439,53 @@ def admin_login_view(request):
             
     return render(request, 'admin_login.html')
 
+
+
+# --- ADMIN VIEWS ---
+
 def admin_home_view(request):
-    # Security check
     if not request.session.get('admin_logged_in'):
         return redirect('admin_login_view')
-        
-    # 1. Fetch all stores where is_approved is False
-    pending_stores = StoreProfile.objects.filter(is_approved=False).order_by('-submitted_at')
     
-    # 2. Pass them to the admin dashboard
-    return render(request, 'admin_home.html', {'pending_stores': pending_stores})
+    pending_stores = StoreProfile.objects.filter(Q(is_approved=False) | Q(is_approved__isnull=True)).order_by('-id')
+    approved_stores = StoreProfile.objects.filter(is_approved=True).order_by('-id')
 
-# NEW: The function that approves the store
+    return render(request, 'admin_home.html', {
+        'pending_stores': pending_stores,
+        'approved_stores': approved_stores
+    })
+
 def approve_store_view(request, store_id):
+    if request.method == 'POST':
+        store = get_object_or_404(StoreProfile, id=store_id)
+        store.is_approved = True
+        store.admin_remarks = "Your profile has been verified and approved."
+        store.save()
+    return redirect('admin_home_view')
+
+def reject_store_view(request, store_id):
+    if request.method == 'POST':
+        store = get_object_or_404(StoreProfile, id=store_id)
+        # Get the reason from the admin's text input
+        reason = request.POST.get('reject_reason', 'Documents were insufficient.')
+        
+        store.is_approved = False 
+        store.admin_remarks = reason
+        store.save()
+        
+        # Option: If you want to DELETE instead of just marking as False:
+        # store.delete() 
+        
+    return redirect('admin_home_view')
+
+def delete_store_view(request, store_id):
+    """ Permanently removes the store profile from the database """
     if not request.session.get('admin_logged_in'):
         return redirect('admin_login_view')
         
     if request.method == 'POST':
-        # Find the specific store and update it
         store = get_object_or_404(StoreProfile, id=store_id)
-        store.is_approved = True
-        store.save()
+        store.delete()
+        # You can add a success message here if you use django.contrib.messages
         
-    # Send the admin back to the dashboard
     return redirect('admin_home_view')

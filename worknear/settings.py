@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -138,3 +139,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'vinit.patil1220@gmail.com' 
 # You must generate a 16-character "App Password" in your Google Account for this
 EMAIL_HOST_PASSWORD = 'ntyb oopp tsib ruqj'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

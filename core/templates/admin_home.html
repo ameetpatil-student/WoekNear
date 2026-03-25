@@ -5,68 +5,116 @@
     <title>WorkNear | Admin Dashboard</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px; }
-        .dashboard-container { max-width: 1000px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
-        th { background-color: #f8fafc; color: #333; }
-        .btn-approve { background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        /* Buttons */
+        .btn-approve { background: #10b981; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-reject { background: #f59e0b; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #ef4444; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
         .btn-approve:hover { background: #059669; }
-        .btn-view { background: #3b82f6; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 14px;}
-        .empty-state { text-align: center; padding: 40px; color: #64748b; }
+        .btn-delete:hover { background: #dc2626; }
+
+        .reject-box { display: flex; flex-direction: column; gap: 5px; }
+        .reject-input { padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+        .doc-link { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        .status-badge { font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-success { background: #ecfdf5; color: #059669; }
+        .store-info { font-size: 0.85em; color: #64748b; }
+        
+        .action-cell { display: flex; gap: 10px; align-items: flex-start; }
     </style>
 </head>
 <body>
 
 <div class="dashboard-container">
-    <div class="header">
-        <h2>WorkNear Admin Dashboard</h2>
-        </div>
+    <h2>WorkNear Admin Dashboard</h2>
 
     <div class="card">
-        <h3>Pending Store Approvals</h3>
-        
+        <h3>Pending Approval</h3>
         {% if pending_stores %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Store Name</th>
-                        <th>Owner</th>
-                        <th>Category</th>
-                        <th>Document</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for store in pending_stores %}
-                    <tr>
-                        <td><strong>{{ store.store_name }}</strong><br><small>{{ store.location }}</small></td>
-                        <td>{{ store.owner_name }}<br><small>{{ store.mobile_number }}</small></td>
-                        <td>{{ store.category|title }}</td>
-                        <td>
-                            {% if store.verification_document %}
-                                <a href="{{ store.verification_document.url }}" target="_blank" class="btn-view">View Doc</a>
-                            {% else %}
-                                <span style="color: red;">No Doc</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <form method="POST" action="{% url 'approve_store' store.id %}">
+        <table>
+            <thead>
+                <tr>
+                    <th>Store/Owner</th>
+                    <th>Document</th>
+                    <th>Approval Actions</th>
+                    <th>Danger Zone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for store in pending_stores %}
+                <tr>
+                    <td>
+                        <strong>{{ store.store_name }}</strong><br>
+                        <span class="store-info">{{ store.name }} | {{ store.mobile_number }}</span>
+                    </td>
+                    <td>
+                        {% if store.verification_document %}
+                            <a href="{{ store.verification_document.url }}" class="doc-link" target="_blank">📄 View Doc</a>
+                        {% else %}
+                            No Doc
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-cell">
+                            <form method="POST" action="{% url 'approve_store_view' store.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-approve">✓ Approve</button>
+                                <button type="submit" class="btn-approve">Approve</button>
                             </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+                            <form method="POST" action="{% url 'reject_store_view' store.id %}" class="reject-box">
+                                {% csrf_token %}
+                                <input type="text" name="reject_reason" class="reject-input" placeholder="Reason..." required>
+                                <button type="submit" class="btn-reject">Reject</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'delete_store_view' store.id %}" onsubmit="return confirm('Permanently delete this store?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         {% else %}
-            <div class="empty-state">
-                <h3>All caught up!</h3>
-                <p>There are no pending stores waiting for approval right now.</p>
-            </div>
+        <p>No pending stores.</p>
         {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Verified Stores</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Store Name</th>
+                    <th>Status</th>
+                    <th>Admin Message</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for store in approved_stores %}
+                <tr>
+                    <td>{{ store.store_name }}</td>
+                    <td><span class="status-badge badge-success">Verified ✅</span></td>
+                    <td class="store-info">{{ store.admin_remarks }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'delete_store_view' store.id %}" onsubmit="return confirm('Delete this verified store?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
