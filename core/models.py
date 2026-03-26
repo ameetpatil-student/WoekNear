@@ -64,3 +64,31 @@ class adminlogin(models.Model):
 
     def __str__(self):
         return self.username
+    
+from django.db import models
+from django.contrib.auth.models import User
+
+class Job(models.Model):
+    employer = models.ForeignKey(User, on_delete=models.CASCADE)
+    job_title = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    job_type = models.CharField(max_length=50)
+    description = models.TextField()
+    requirements = models.TextField(blank=True, null=True)
+    salary = models.CharField(max_length=100, blank=True, null=True)
+    deadline = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.job_title
+
+class Ad(models.Model):
+    employer = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255) # Maps to job_title in your Ad form
+    location = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

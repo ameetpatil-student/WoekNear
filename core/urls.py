@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('index', views.index, name='index'),
+    path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),
     path('employer-login/', views.employer_login, name='employer_login'),
     path('register/', views.register, name='register'),
@@ -27,6 +27,12 @@ urlpatterns = [
     path('approve-store/<int:store_id>/', views.approve_store_view, name='approve_store_view'),
     path('reject-store/<int:store_id>/', views.reject_store_view, name='reject_store_view'),
     path('admin/delete-store/<int:store_id>/', views.delete_store_view, name='delete_store_view'),
+    path('post-job/', views.post_job_view, name='post_job'),
+    path('add-ad/', views.add_ad_view, name='add_ad'),
+    path('delete-job/<int:pk>/', views.delete_job, name='delete_job'),
+    path('delete-ad/<int:pk>/', views.delete_ad, name='delete_ad'),
+    path('home/', views.jobseeker_home, name='jobseeker_home'),
+    path('apply/<int:job_id>/', views.apply_job, name='apply_job'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

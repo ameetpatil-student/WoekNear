@@ -1,7 +1,7 @@
 from urllib import request
 from django.db.models import Q
 from django.contrib.auth.models import User 
-from .models import StoreProfile , adminlogin
+from .models import StoreProfile , adminlogin ,Job , Ad
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
@@ -13,15 +13,8 @@ import random
 
 
 
- # Make sure this matches your actual model name
-@login_required 
-def jobseeker_home(request):
-    """View for the Job Seeker dashboard."""
-    jobs_list = Job.objects.all() 
-    context = {
-        'jobs': jobs_list
-    }
-    return render(request, 'jobseeker_home.html', context)
+ 
+
 
 
 @login_required 
@@ -489,3 +482,83 @@ def delete_store_view(request, store_id):
         # You can add a success message here if you use django.contrib.messages
         
     return redirect('admin_home_view')
+
+
+#job post and add adds
+
+
+@login_required
+def employer_dashboard(request):
+    profile = StoreProfile.objects.filter(employer=request.user).first()
+    
+    # Fetch only this employer's posts
+    my_jobs = Job.objects.filter(employer=request.user).order_by('-created_at')
+    my_ads = Ad.objects.filter(employer=request.user).order_by('-created_at')
+    
+    context = {
+        'profile': profile,
+        'has_profile': profile is not None,
+        'is_approved': profile.is_approved if profile else False,
+        'my_jobs': my_jobs,
+        'my_ads': my_ads,
+    }
+    return render(request, 'employer_home.html', context)
+
+@login_required
+def post_job_view(request):
+    if request.method == "POST":
+        Job.objects.create(
+            employer=request.user,
+            job_title=request.POST.get('job_title'),
+            location=request.POST.get('location'),
+            job_type=request.POST.get('job_type'),
+            description=request.POST.get('description'),
+            requirements=request.POST.get('requirements'),
+            salary=request.POST.get('salary'),
+            deadline=request.POST.get('deadline'),
+        )
+        return redirect('employer_dashboard')
+    return render(request, 'post_job.html')
+
+@login_required
+def add_ad_view(request):
+    if request.method == "POST":
+        Ad.objects.create(
+            employer=request.user,
+            title=request.POST.get('job_title'), # Using field names from your HTML
+            location=request.POST.get('location'),
+            description=request.POST.get('description'),
+        )
+        return redirect('employer_dashboard')
+    return render(request, 'add_adds.html')
+
+@login_required
+def delete_job(request, pk):
+    job = get_object_or_404(Job, pk=pk, employer=request.user)
+    job.delete()
+    return redirect('employer_dashboard')
+
+@login_required
+def delete_ad(request, pk):
+    ad = get_object_or_404(Ad, pk=pk, employer=request.user)
+    ad.delete()
+    return redirect('employer_dashboard')
+
+
+# This view is for the Job Seeker's homepage, where they can see all available jobs.    
+@login_required
+def jobseeker_home(request):
+    # Fetch all jobs, newest first
+    jobs_list = Job.objects.all().order_by('-created_at')
+    
+    context = {
+        'jobs': jobs_list
+    }
+    return render(request, 'jobseeker_home.html', context)
+
+@login_required
+def apply_job(request, job_id):
+    # Logic for what happens when they click "Apply"
+    job = get_object_or_404(Job, id=job_id)
+    # You can add logic here to save the application to a new Model
+    return render(request, 'apply_success.html', {'job': job})
