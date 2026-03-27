@@ -184,12 +184,6 @@
             <a href="{% url 'login_view' %}" class="btn-hero-primary">Find Local Work</a>
             <a href="{% url 'employer_login' %}" class="btn-hero-secondary">Hire Neighbors</a>
         </div>
-
-        <div class="stats-bar">
-            <div class="stat-item"><b>12k+</b> Active Jobs</div>
-            <div class="stat-item"><b>450+</b> Local Companies</div>
-            <div class="stat-item"><b>< 5 mi</b> Avg. Commute</div>
-        </div>
     </header>
 
     <section class="roles-section">
@@ -222,25 +216,26 @@
     <main class="feed-container">
         <h2 style="font-size: 1.8rem; margin-bottom: 30px; text-align: center;">Recently Posted Near You</h2>
 
+        {% for ad in recent_ads %}
         <div class="job-card">
             <div>
-                <div style="font-weight: 800; font-size: 1.2rem;">Community Manager</div>
+                <div style="font-weight: 800; font-size: 1.2rem;">{{ ad.title }}</div>
                 <div style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
-                    Green Space Co. • <b>0.8 miles away</b> • $28/hr
+                    📍 {{ ad.location }} {% if ad.category %}• <b>{{ ad.category }}</b>{% endif %}
                 </div>
-            </div>
-            <div style="font-weight: 700; color: var(--primary); cursor: pointer; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 10px;">View →</div>
-        </div>
-
-        <div class="job-card">
-            <div>
-                <div style="font-weight: 800; font-size: 1.2rem;">Inventory Specialist</div>
-                <div style="color: var(--text-muted); font-size: 0.95rem; margin-top: 8px;">
-                    Urban Outfitters • <b>1.2 miles away</b> • $20/hr
+                {% if ad.description %}
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px;">
+                    {{ ad.description|truncatewords:15 }}
                 </div>
+                {% endif %}
             </div>
-            <div style="font-weight: 700; color: var(--primary); cursor: pointer; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 10px;">View →</div>
+            <a href="{% url 'login_view' %}" style="font-weight: 700; color: var(--primary); cursor: pointer; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 10px; text-decoration: none;">View →</a>
         </div>
+        {% empty %}
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+            <p style="font-size: 1.1rem;">No ads posted yet. Check back soon!</p>
+        </div>
+        {% endfor %}
     </main>
 
     <footer>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply – {{ job.job_title }} | WorkNear</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --dark: #111827;
+            --text: #374151;
+            --muted: #6b7280;
+            --bg: #f9fafb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --success: #059669;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* NAV */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.2rem 5%; background: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-brand { font-weight: 800; font-size: 1.3rem; color: var(--dark); text-decoration: none; }
+        .nav-brand span { font-weight: 400; opacity: .5; }
+        .back-link { color: var(--primary); text-decoration: none; font-weight: 600; font-size: .9rem; display: flex; align-items: center; gap: 6px; transition: .2s; }
+        .back-link:hover { opacity: .7; }
+
+        /* LAYOUT */
+        .container { max-width: 860px; margin: 40px auto; padding: 0 20px; }
+
+        /* JOB HEADER CARD */
+        .job-header-card {
+            background: var(--dark); color: white;
+            border-radius: 20px; padding: 35px 40px;
+            margin-bottom: 30px; position: relative; overflow: hidden;
+        }
+        .job-header-card::before {
+            content: ''; position: absolute; top: -60px; right: -60px;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: var(--primary); opacity: .15;
+        }
+        .job-badge {
+            display: inline-block; background: rgba(79,70,229,.25); color: #a5b4fc;
+            padding: 6px 16px; border-radius: 50px; font-size: .75rem;
+            font-weight: 700; letter-spacing: .03em; margin-bottom: 14px;
+        }
+        .job-header-card h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+        .job-meta { display: flex; gap: 20px; font-size: .9rem; color: #9ca3af; flex-wrap: wrap; }
+        .job-meta span { display: flex; align-items: center; gap: 5px; }
+
+        /* FORM CARD */
+        .form-card {
+            background: var(--card); border-radius: 20px;
+            padding: 40px; border: 1px solid var(--border);
+            box-shadow: 0 4px 24px -8px rgba(0,0,0,.06);
+        }
+        .form-card h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; color: var(--dark); }
+        .form-card .subtitle { color: var(--muted); font-size: .9rem; margin-bottom: 30px; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 22px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label {
+            display: block; font-weight: 600; font-size: .85rem;
+            color: var(--dark); margin-bottom: 8px;
+        }
+
+        input[type="text"], input[type="email"], input[type="tel"], textarea, input[type="file"] {
+            width: 100%; padding: 12px 16px;
+            border: 2px solid var(--border); border-radius: var(--radius);
+            font-family: inherit; font-size: .95rem; color: var(--text);
+            background: var(--bg); transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79,70,229,.1);
+        }
+        textarea { resize: vertical; min-height: 100px; }
+
+        input[type="file"] {
+            padding: 10px; cursor: pointer;
+        }
+
+        .btn-submit {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--primary); color: white;
+            border: none; padding: 14px 36px; border-radius: var(--radius);
+            font-family: inherit; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all .25s; margin-top: 10px;
+        }
+        .btn-submit:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 8px 20px -4px rgba(79,70,229,.35); }
+
+        /* SUCCESS MESSAGE */
+        .alert-success {
+            background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;
+            padding: 16px 20px; border-radius: var(--radius); margin-bottom: 25px;
+            font-weight: 600; display: flex; align-items: center; gap: 8px;
+        }
+        .alert-error {
+            background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+            padding: 16px 20px; border-radius: var(--radius); margin-bottom: 25px;
+            font-weight: 600; display: flex; align-items: center; gap: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row { grid-template-columns: 1fr; }
+            .job-header-card { padding: 25px; }
+            .form-card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="{% url 'jobseeker_home' %}" class="nav-brand">WorkNear <span>| Apply</span></a>
+        <a href="{% url 'jobseeker_home' %}" class="back-link">← Back to Jobs</a>
+    </nav>
+
+    <div class="container">
+
+        <!-- JOB DETAILS HEADER -->
+        <div class="job-header-card">
+            <span class="job-badge">{{ job.job_type|upper }}</span>
+            <h1>{{ job.job_title }}</h1>
+            <div class="job-meta">
+                <span>📍 {{ job.location }}</span>
+                <span>💰 {{ job.salary|default:"Competitive" }}</span>
+                <span>📅 Deadline: {{ job.deadline }}</span>
+            </div>
+        </div>
+
+        <!-- MESSAGES -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- APPLICATION FORM -->
+        <div class="form-card">
+            <h2>Your Application</h2>
+            <p class="subtitle">Fill in your details below. All fields marked with * are required.</p>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">Full Name *</label>
+                        <input type="text" name="full_name" id="full_name" placeholder="e.g. John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" name="email" id="email" placeholder="e.g. john@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" name="phone" id="phone" placeholder="e.g. +91 9876543210" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">Work Experience</label>
+                    <textarea name="experience" id="experience" rows="3" placeholder="Briefly describe your relevant work experience..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="skills">Skills</label>
+                    <textarea name="skills" id="skills" rows="3" placeholder="e.g. Python, Communication, Teamwork..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="cover_letter">Cover Letter</label>
+                    <textarea name="cover_letter" id="cover_letter" rows="5" placeholder="Tell the employer why you're a great fit for this role..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="resume">Upload Resume (PDF/DOC)</label>
+                    <input type="file" name="resume" id="resume" accept=".pdf,.doc,.docx">
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Submit Application →
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

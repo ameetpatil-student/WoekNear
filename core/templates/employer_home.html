@@ -99,9 +99,12 @@
                     {% for job in my_jobs %}
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
                             <div><strong>{{ job.job_title }}</strong><br><small style="color: gray;">Ends: {{ job.deadline }}</small></div>
-                            <form action="{% url 'delete_job' job.pk %}" method="POST" onsubmit="return confirm('Delete this job?')">
-                                {% csrf_token %}<button type="submit" class="delete-btn">Delete</button>
-                            </form>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <a href="{% url 'view_applications' job.pk %}" style="background: #eef2ff; color: #4f46e5; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; text-decoration: none;">📋 Applications ({{ job.applications.count }})</a>
+                                <form action="{% url 'delete_job' job.pk %}" method="POST" onsubmit="return confirm('Delete this job?')">
+                                    {% csrf_token %}<button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </div>
                         </div>
                     {% empty %}<p style="color:gray">No jobs posted.</p>{% endfor %}
                 </div>

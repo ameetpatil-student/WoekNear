@@ -1,7 +1,7 @@
 from urllib import request
 from django.db.models import Q
 from django.contrib.auth.models import User 
-from .models import StoreProfile , adminlogin ,Job , Ad
+from .models import StoreProfile , adminlogin ,Job , Ad, JobApplication
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 import random
+from django.views.decorators.cache import never_cache
 
 
 
@@ -34,6 +35,7 @@ def employer_dashboard(request):
 from .models import Profile, Usertype 
 
 # --- JOB SEEKER REGISTRATION ---
+@never_cache
 def register(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -59,6 +61,7 @@ def register(request):
     return render(request, "register.html")
 
 # --- EMPLOYER REGISTRATION ---
+@never_cache
 def employer_register(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -85,6 +88,7 @@ def employer_register(request):
 
 
 # --- JOB SEEKER LOGIN ---
+@never_cache
 def login_view(request):
     if request.method == "POST":
         email_input = request.POST.get("email") 
@@ -128,7 +132,7 @@ def login_view(request):
 
 
 # --- EMPLOYER LOGIN ---
-# --- EMPLOYER LOGIN ---
+@never_cache
 def employer_login(request):
     if request.method == "POST":
         # Check if the HTML form is sending an "email" OR a "username"
@@ -184,7 +188,8 @@ def employer_home(request):
     return render(request, "employer_home.html")
 
 def index(request):
-    return render(request, "index.html")
+    recent_ads = Ad.objects.all().order_by('-created_at')[:10]
+    return render(request, "index.html", {'recent_ads': recent_ads})
 
 def logout_view(request):
     logout(request)
@@ -505,6 +510,7 @@ def employer_dashboard(request):
     return render(request, 'employer_home.html', context)
 
 @login_required
+@never_cache
 def post_job_view(request):
     if request.method == "POST":
         Job.objects.create(
@@ -547,6 +553,7 @@ def delete_ad(request, pk):
 
 # This view is for the Job Seeker's homepage, where they can see all available jobs.    
 @login_required
+@never_cache
 def jobseeker_home(request):
     # Fetch all jobs, newest first
     jobs_list = Job.objects.all().order_by('-created_at')
@@ -557,8 +564,41 @@ def jobseeker_home(request):
     return render(request, 'jobseeker_home.html', context)
 
 @login_required
+@never_cache
 def apply_job(request, job_id):
-    # Logic for what happens when they click "Apply"
     job = get_object_or_404(Job, id=job_id)
-    # You can add logic here to save the application to a new Model
-    return render(request, 'apply_success.html', {'job': job})
+
+    # Check if user already applied
+    already_applied = JobApplication.objects.filter(job=job, applicant=request.user).exists()
+    if already_applied:
+        messages.error(request, "You have already applied for this job.")
+        return redirect('jobseeker_home')
+
+    if request.method == 'POST':
+        JobApplication.objects.create(
+            job=job,
+            applicant=request.user,
+            full_name=request.POST.get('full_name'),
+            email=request.POST.get('email'),
+            phone=request.POST.get('phone'),
+            experience=request.POST.get('experience', ''),
+            skills=request.POST.get('skills', ''),
+            cover_letter=request.POST.get('cover_letter', ''),
+            resume=request.FILES.get('resume'),
+        )
+        messages.success(request, f"Your application for '{job.job_title}' has been submitted!")
+        return redirect('jobseeker_home')
+
+    return render(request, 'apply_job.html', {'job': job})
+
+
+@login_required
+def view_applications(request, job_id):
+    """Employer view: see all applications for a specific job they own."""
+    job = get_object_or_404(Job, id=job_id, employer=request.user)
+    applications = JobApplication.objects.filter(job=job).order_by('-applied_at')
+    return render(request, 'view_applications.html', {
+        'job': job,
+        'applications': applications,
+    })
+

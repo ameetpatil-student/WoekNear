@@ -33,6 +33,7 @@ urlpatterns = [
     path('delete-ad/<int:pk>/', views.delete_ad, name='delete_ad'),
     path('home/', views.jobseeker_home, name='jobseeker_home'),
     path('apply/<int:job_id>/', views.apply_job, name='apply_job'),
+    path('job/<int:job_id>/applications/', views.view_applications, name='view_applications'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
