@@ -102,7 +102,7 @@
         <div class="alert alert-success">{{ success }}</div>
     {% endif %}
     
-    <form method="POST" action="{% url 'register_view' %}">
+    <form method="POST" action="{% url 'register_view' %}" autocomplete="off">
         {% csrf_token %}
         
         {% if otp_sent %}

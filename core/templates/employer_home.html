@@ -42,8 +42,11 @@
 
     <nav>
         <a href="#" class="logo">WorkNear <span style="font-weight: 400; opacity: 0.5;">| Partner</span></a>
-        <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-            {{ request.user.username|slice:":1"|upper }}
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="{% url 'logout_view' %}" style="text-decoration: none; color: #dc2626; font-weight: 600;">Logout</a>
+            <div style="width: 40px; height: 40px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                {{ request.user.username|slice:":1"|upper }}
+            </div>
         </div>
     </nav>
 
@@ -98,10 +101,14 @@
                     <h3 style="margin-top:0">💼 Jobs</h3>
                     {% for job in my_jobs %}
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
-                            <div><strong>{{ job.job_title }}</strong><br><small style="color: gray;">Ends: {{ job.deadline }}</small></div>
+                            <div>
+                                <strong>{{ job.job_title }}</strong>
+                                {% if job.job_timing %}<span style="font-size: 0.85rem; color: #64748b; margin-left: 10px;">⏰ {{ job.job_timing }}</span>{% endif %}
+                                <br><small style="color: gray;">Ends: {{ job.deadline }}</small>
+                            </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <a href="{% url 'view_applications' job.pk %}" style="background: #eef2ff; color: #4f46e5; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; text-decoration: none;">📋 Applications ({{ job.applications.count }})</a>
-                                <form action="{% url 'delete_job' job.pk %}" method="POST" onsubmit="return confirm('Delete this job?')">
+                                <form action="{% url 'delete_job' job.pk %}" method="POST" onsubmit="return confirm('Delete this job?')" autocomplete="off">
                                     {% csrf_token %}<button type="submit" class="delete-btn">Delete</button>
                                 </form>
                             </div>
@@ -114,7 +121,7 @@
                     {% for ad in my_ads %}
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
                             <div><strong>{{ ad.title }}</strong><br><small style="color: gray;">Posted: {{ ad.created_at|date }}</small></div>
-                            <form action="{% url 'delete_ad' ad.pk %}" method="POST" onsubmit="return confirm('Delete this ad?')">
+                            <form action="{% url 'delete_ad' ad.pk %}" method="POST" onsubmit="return confirm('Delete this ad?')" autocomplete="off">
                                 {% csrf_token %}<button type="submit" class="delete-btn">Delete</button>
                             </form>
                         </div>

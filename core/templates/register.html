@@ -72,7 +72,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <form method="POST" action="{% url 'register' %}">
+                <form method="POST" action="{% url 'register' %}" autocomplete="off">
                     {% csrf_token %}
                     <div class="input-group">
                         <label>Username</label>

@@ -17,22 +17,6 @@ class Profile(models.Model):
     
 # NOTICE: StoreProfile is now fully separated from Profile
 
-class Usertype(models.Model):
-    type = models.CharField(max_length=100) 
-
-    def __str__(self):
-        return self.type
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    usertype = models.ForeignKey(Usertype, on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return self.user.username
-    
-# NOTICE: StoreProfile is now fully separated from Profile
- # Assuming employers log in with standard Django auth
-
 class StoreProfile(models.Model):
     employer = models.OneToOneField(User, on_delete=models.CASCADE) # Links profile to the logged-in user
     
@@ -72,6 +56,7 @@ class Job(models.Model):
     job_type = models.CharField(max_length=50)
     description = models.TextField()
     requirements = models.TextField(blank=True, null=True)
+    job_timing = models.CharField(max_length=100, blank=True, null=True)
     salary = models.CharField(max_length=100, blank=True, null=True)
     deadline = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)

@@ -192,6 +192,32 @@
             display: none;
         }
 
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error, .alert-danger { background: #f8dbdf; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        /* Disabled Button */
+        .btn-disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            padding: 10px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: bold;
+            display: block;
+            cursor: not-allowed;
+            border: 1px solid #cbd5e1;
+        }
+
         @media (max-width: 768px) {
             .layout-wrapper { flex-direction: column; }
             .sidebar-ads, .main-content { width: 100%; height: auto; position: relative; top: 0; }
@@ -206,6 +232,7 @@
         <div class="user-profile">
             <span>Welcome, {{ request.user.first_name|default:request.user.username }}</span>
             <div class="avatar">{{ request.user.username|slice:":1"|upper }}</div>
+            <a href="{% url 'logout_view' %}" style="text-decoration: none; color: #dc2626; font-weight: 600; margin-left: 10px;">Logout</a>
         </div>
     </nav>
 
@@ -224,6 +251,15 @@
         </aside>
 
         <main class="main-content">
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             <div class="header-section">
                 <h1>Recommended Jobs</h1>
                 <span style="color: var(--secondary);">Showing {{ jobs.count }} positions</span>
@@ -244,7 +280,10 @@
                 <div class="job-card" data-type="{{ job.job_type|lower }}">
                     <span class="job-type-badge">{{ job.job_type|upper }}</span>
                     <h3>{{ job.job_title }}</h3>
-                    <p style="color: #6c757d; font-size: 0.9rem;">🏢 {{ job.location }}</p>
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 5px;">🏢 {{ job.location }}</p>
+                    {% if job.job_timing %}
+                    <p style="color: #6c757d; font-size: 0.9rem; margin-top: 0;">⏰ {{ job.job_timing }}</p>
+                    {% endif %}
 
                     <p style="font-size: 0.9rem; color: #444; flex-grow: 1;">
                         {{ job.description|truncatewords:20 }}
@@ -254,7 +293,11 @@
                         <strong>Requirements:</strong> {{ job.requirements|truncatewords:10 }}
                     </div>
 
-                    <a href="{% url 'apply_job' job.id %}" class="apply-btn">Apply Now</a>
+                    {% if job.id in applied_job_ids %}
+                        <div class="btn-disabled">✓ Already Applied</div>
+                    {% else %}
+                        <a href="{% url 'apply_job' job.id %}" class="apply-btn">Apply Now</a>
+                    {% endif %}
                 </div>
                 {% empty %}
                 <div style="text-align: center; grid-column: 1 / -1; padding: 50px;">

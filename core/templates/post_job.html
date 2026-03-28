@@ -122,7 +122,7 @@
         <p style="color: #64748b;">Fill in the details below to find your next great hire.</p>
     </div>
 
-    <form method="POST">
+    <form method="POST" autocomplete="off">
         {% csrf_token %}
 
         <div class="form-section">
@@ -155,9 +155,23 @@
                 <label for="id_description">Job Description</label>
                 <textarea name="description" id="id_description" placeholder="Describe the role and day-to-day tasks..." required></textarea>
             </div>
+            
             <div class="form-group">
-                <label for="id_requirements">Requirements</label>
-                <textarea name="requirements" id="id_requirements" placeholder="What skills should the candidate have?"></textarea>
+                <label>Requirements</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: #fff;">
+                    <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;"><input type="checkbox" name="requirements" value="Communication Skills"> Communication Skills</label>
+                    <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;"><input type="checkbox" name="requirements" value="Problem Solving"> Problem Solving</label>
+                    <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;"><input type="checkbox" name="requirements" value="Teamwork"> Teamwork</label>
+                    <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;"><input type="checkbox" name="requirements" value="Leadership"> Leadership</label>
+                    <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;"><input type="checkbox" name="requirements" value="Time Management"> Time Management</label>
+                    <label style="font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;"><input type="checkbox" name="requirements" value="Technical Skills"> Technical Skills</label>
+                </div>
+                <input type="text" name="custom_requirements" placeholder="Add custom requirements (comma separated)...">
+            </div>
+
+            <div class="form-group">
+                <label for="id_job_timing">Job Timing</label>
+                <input type="text" name="job_timing" id="id_job_timing" placeholder="e.g. 9am - 8pm or Flexible">
             </div>
         </div>
 
@@ -178,6 +192,14 @@
         <button type="submit" class="btn-submit">Post Job Now</button>
     </form>
 </div>
+
+<script>
+    // Prevent selecting past dates for the deadline
+    document.addEventListener("DOMContentLoaded", function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('id_deadline').setAttribute('min', today);
+    });
+</script>
 
 </body>
 </html>

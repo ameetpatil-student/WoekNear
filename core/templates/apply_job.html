@@ -160,17 +160,18 @@
             <h2>Your Application</h2>
             <p class="subtitle">Fill in your details below. All fields marked with * are required.</p>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="applicationForm" autocomplete="off">
                 {% csrf_token %}
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="full_name">Full Name *</label>
-                        <input type="text" name="full_name" id="full_name" placeholder="e.g. John Doe" required>
+                        <input type="text" name="full_name" id="full_name" value="{% if request.user.first_name %}{{ request.user.first_name|default:'' }} {{ request.user.last_name|default:'' }}{% else %}{{ request.user.username }}{% endif %}" placeholder="e.g. John Doe" required>
                     </div>
                     <div class="form-group">
                         <label for="email">Email Address *</label>
-                        <input type="email" name="email" id="email" placeholder="e.g. john@example.com" required>
+                        <input type="email" name="email" id="email" value="{{ request.user.email }}" placeholder="e.g. john@example.com" required readonly style="background: #f3f4f6; cursor: not-allowed; color: #6b7280;">
+                        <small style="color: var(--primary); display: block; margin-top: 4px;">Fetched from your profile</small>
                     </div>
                 </div>
 
@@ -180,13 +181,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="experience">Work Experience</label>
-                    <textarea name="experience" id="experience" rows="3" placeholder="Briefly describe your relevant work experience..."></textarea>
+                    <label for="experience">Work Experience *</label>
+                    <select name="experience" id="experience" required style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; color: var(--text); background: var(--bg); transition: border-color 0.2s, box-shadow 0.2s; outline: none; cursor: pointer; appearance: none;">
+                        <option value="" disabled selected>Select your experience level</option>
+                        <option value="Fresher / 0 years">Fresher / 0 years</option>
+                        <option value="1 year">1 year</option>
+                        <option value="2 years">2 years</option>
+                        <option value="3 years">3 years</option>
+                        <option value="4 years">4 years</option>
+                        <option value="5 years">5 years</option>
+                        <option value="6 years">6 years</option>
+                        <option value="7 years">7 years</option>
+                        <option value="8 years">8 years</option>
+                        <option value="9 years">9 years</option>
+                        <option value="10 years">10 years</option>
+                        <option value="11 years">11 years</option>
+                        <option value="12 years">12 years</option>
+                        <option value="13 years">13 years</option>
+                        <option value="14 years">14 years</option>
+                        <option value="15+ years">15+ years</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="skills">Skills</label>
-                    <textarea name="skills" id="skills" rows="3" placeholder="e.g. Python, Communication, Teamwork..."></textarea>
+                    <label>Select Your Skills</label>
+                    <div id="skills-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                        <!-- Skill tags will be generated here -->
+                    </div>
+                    <!-- Hidden input to store selected skills for Django to process -->
+                    <input type="hidden" name="skills" id="skills_input" value="">
                 </div>
 
                 <div class="form-group">
@@ -205,6 +228,107 @@
             </form>
         </div>
     </div>
+
+    <style>
+        .skill-tag {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .skill-tag:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .skill-tag.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script>
+        const commonSkills = [
+            "Python", "Java", "JavaScript", "HTML/CSS", "React", "Angular", "Vue.js", "Node.js",
+            "Django", "Flask", "Spring Boot", "C++", "C#", "SQL", "NoSQL", "MongoDB",
+            "Data Analysis", "Machine Learning", "AWS", "Azure", "Docker", "Kubernetes",
+            "Git", "UI/UX Design", "Figma", "Photoshop", "Communication", "Teamwork",
+            "Problem Solving", "Project Management", "Agile/Scrum", "Marketing", "SEO"
+        ];
+
+        const container = document.getElementById('skills-container');
+        const hiddenInput = document.getElementById('skills_input');
+        let selectedSkills = [];
+
+        // Determine which skills to show based on job title (basic logic)
+        let jobTitle = "{{ job.job_title|lower }}";
+        let defaultSkills = [...commonSkills].sort(() => 0.5 - Math.random()).slice(0, 15); // Show 15 random skills by default
+
+        // Render skill tags
+        defaultSkills.forEach(skill => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.textContent = skill;
+            
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+                if (tag.classList.contains('selected')) {
+                    selectedSkills.push(skill);
+                } else {
+                    selectedSkills = selectedSkills.filter(s => s !== skill);
+                }
+                
+                // Update hidden input with comma separated string
+                hiddenInput.value = selectedSkills.join(', ');
+            });
+            
+            container.appendChild(tag);
+        });
+
+        // Add custom skill logic
+        const customSkillInput = document.createElement('input');
+        customSkillInput.type = 'text';
+        customSkillInput.placeholder = '+ Add custom skill (Press Enter)';
+        customSkillInput.style.cssText = 'padding: 8px 16px; border-radius: 50px; border: 1px dashed var(--border); outline: none; font-size: 0.9rem; background: transparent; width: 220px;';
+        
+        customSkillInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const newSkill = this.value.trim();
+                if (newSkill && !selectedSkills.includes(newSkill) && !defaultSkills.includes(newSkill)) {
+                    
+                    const tag = document.createElement('div');
+                    tag.className = 'skill-tag selected';
+                    tag.textContent = newSkill;
+                    
+                    tag.addEventListener('click', () => {
+                        tag.classList.toggle('selected');
+                        if (tag.classList.contains('selected')) {
+                            selectedSkills.push(newSkill);
+                        } else {
+                            selectedSkills = selectedSkills.filter(s => s !== newSkill);
+                        }
+                        hiddenInput.value = selectedSkills.join(', ');
+                    });
+                    
+                    selectedSkills.push(newSkill);
+                    hiddenInput.value = selectedSkills.join(', ');
+                    
+                    container.insertBefore(tag, customSkillInput);
+                    this.value = '';
+                }
+            }
+        });
+        
+        container.appendChild(customSkillInput);
+    </script>
 
 </body>
 </html>

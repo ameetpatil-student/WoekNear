@@ -14,22 +14,6 @@ from django.views.decorators.cache import never_cache
 
 
 
- 
-
-
-
-@login_required 
-def employer_dashboard(request):
-    """View for the Employer dashboard."""
-    return render(request, 'employer_dashboard.html')
-
-# The @login_required decorator forces users to log in before seeing this page.
-# If they are not logged in, Django will redirect them to your login URL.
-@login_required 
-def employer_dashboard(request):
-    # This renders the HTML page. Because 'request' is passed in, 
-    # the template automatically has access to the user's data.
-    return render(request, 'employer_dashboard.html')
 
 # Assuming these are in your models.py
 from .models import Profile, Usertype 
@@ -183,17 +167,13 @@ def employer_login(request):
 
 # --- HOME PAGES ---
 
-@login_required
-def employer_home(request):
-    return render(request, "employer_home.html")
-
 def index(request):
     recent_ads = Ad.objects.all().order_by('-created_at')[:10]
     return render(request, "index.html", {'recent_ads': recent_ads})
 
 def logout_view(request):
     logout(request)
-    return redirect("login_view")
+    return redirect("index")
 
 
 # --- JOB SEEKER PASSWORD RESET ---
@@ -335,23 +315,20 @@ def register_store_profile(request):
 
 @login_required(login_url='login_view') 
 def employer_home(request):
-    # 1. Try to fetch the profile for the logged-in user
-    # .filter().first() is safer than .get() because it won't crash if the profile is missing
     profile = StoreProfile.objects.filter(employer=request.user).first()
     
-    # 2. Build the context dictionary
+    # Fetch this employer's jobs and ads
+    my_jobs = Job.objects.filter(employer=request.user).order_by('-created_at')
+    my_ads = Ad.objects.filter(employer=request.user).order_by('-created_at')
+    
     context = {
         'profile': profile,
-        # This acts as your 'has_profile' flag: 
-        # In HTML, you can just do {% if profile %}
         'has_profile': profile is not None,
-        
-        # This acts as your 'is_approved' flag:
-        # It safely checks the attribute only if the profile exists
         'is_approved': profile.is_approved if profile else False,
+        'my_jobs': my_jobs,
+        'my_ads': my_ads,
     }
 
-    # 3. Send everything to the template
     return render(request, 'employer_home.html', context)
 
 
@@ -513,13 +490,20 @@ def employer_dashboard(request):
 @never_cache
 def post_job_view(request):
     if request.method == "POST":
+        reqs = request.POST.getlist('requirements')
+        custom_reqs = request.POST.get('custom_requirements', '').strip()
+        if custom_reqs:
+            reqs.append(custom_reqs)
+        final_requirements = ", ".join([r for r in reqs if r])
+
         Job.objects.create(
             employer=request.user,
             job_title=request.POST.get('job_title'),
             location=request.POST.get('location'),
             job_type=request.POST.get('job_type'),
             description=request.POST.get('description'),
-            requirements=request.POST.get('requirements'),
+            requirements=final_requirements,
+            job_timing=request.POST.get('job_timing'),
             salary=request.POST.get('salary'),
             deadline=request.POST.get('deadline'),
         )
@@ -558,8 +542,12 @@ def jobseeker_home(request):
     # Fetch all jobs, newest first
     jobs_list = Job.objects.all().order_by('-created_at')
     
+    # Get IDs of jobs the user has already applied for
+    applied_job_ids = JobApplication.objects.filter(applicant=request.user).values_list('job_id', flat=True)
+    
     context = {
-        'jobs': jobs_list
+        'jobs': jobs_list,
+        'applied_job_ids': list(applied_job_ids)
     }
     return render(request, 'jobseeker_home.html', context)
 

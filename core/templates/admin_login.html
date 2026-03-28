@@ -98,7 +98,7 @@
         </div>
     {% endif %}
     
-    <form method="POST" action="{% url 'admin_login_view' %}">
+    <form method="POST" action="{% url 'admin_login_view' %}" autocomplete="off">
         {% csrf_token %}
         
         <div class="form-group">

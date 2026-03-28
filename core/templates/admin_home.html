@@ -31,7 +31,10 @@
 <body>
 
 <div class="dashboard-container">
-    <h2>WorkNear Admin Dashboard</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>WorkNear Admin Dashboard</h2>
+        <a href="{% url 'logout_view' %}" style="text-decoration: none; color: white; background-color: #ef4444; padding: 8px 16px; border-radius: 4px; font-weight: bold;">Logout</a>
+    </div>
 
     <div class="card">
         <h3>Pending Approval</h3>
@@ -61,12 +64,12 @@
                     </td>
                     <td>
                         <div class="action-cell">
-                            <form method="POST" action="{% url 'approve_store_view' store.id %}">
+                            <form method="POST" action="{% url 'approve_store_view' store.id %}" autocomplete="off">
                                 {% csrf_token %}
                                 <button type="submit" class="btn-approve">Approve</button>
                             </form>
 
-                            <form method="POST" action="{% url 'reject_store_view' store.id %}" class="reject-box">
+                            <form method="POST" action="{% url 'reject_store_view' store.id %}" class="reject-box" autocomplete="off">
                                 {% csrf_token %}
                                 <input type="text" name="reject_reason" class="reject-input" placeholder="Reason..." required>
                                 <button type="submit" class="btn-reject">Reject</button>
@@ -74,7 +77,7 @@
                         </div>
                     </td>
                     <td>
-                        <form method="POST" action="{% url 'delete_store_view' store.id %}" onsubmit="return confirm('Permanently delete this store?');">
+                        <form method="POST" action="{% url 'delete_store_view' store.id %}" onsubmit="return confirm('Permanently delete this store?');" autocomplete="off">
                             {% csrf_token %}
                             <button type="submit" class="btn-delete">Delete</button>
                         </form>
@@ -106,7 +109,7 @@
                     <td><span class="status-badge badge-success">Verified ✅</span></td>
                     <td class="store-info">{{ store.admin_remarks }}</td>
                     <td>
-                        <form method="POST" action="{% url 'delete_store_view' store.id %}" onsubmit="return confirm('Delete this verified store?');">
+                        <form method="POST" action="{% url 'delete_store_view' store.id %}" onsubmit="return confirm('Delete this verified store?');" autocomplete="off">
                             {% csrf_token %}
                             <button type="submit" class="btn-delete">Delete</button>
                         </form>
